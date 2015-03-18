@@ -21,7 +21,7 @@ main :: IO()
 main = mainWith (masterDia # frame 0.1)
 
 saveMaster :: IO ()
-saveMaster = renderSVG "master.svg" (Width 300) masterDia
+saveMaster = renderSVG "master.svg" (Width 200) masterDia
 
 diagramsInfo :: [(Diagram B R2, String, SizeSpec2D)]
 diagramsInfo = [(d1,"d1", Height 150)

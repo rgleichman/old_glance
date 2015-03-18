@@ -7,13 +7,15 @@ module DrawUtil
        ,defLineWidth
        ,ApplyPorts(..)
        ,applyTriangle
+       ,funParam
        ,funApply
+       ,result
        ,textInBox
        ,textInBox'
        ,conIcons
        ,conIconPort
        ,conPortIcon
-       ,Icon
+       ,Icon(..)
        )
        where
 
@@ -104,32 +106,43 @@ data ApplyPorts = AppL | AppR | AppOut | AppIn
 
 instance IsName ApplyPorts
 
---applyTriangle :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Colour Double -> t -> QDiagram b R2 m
 applyTriangle :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Colour Double -> t -> (QDiagram b R2 m, (t, Icon))
-applyTriangle color name = (diagram, (name, Apply))
+applyTriangle = argumentOrParam 1 applyTriColor
+
+funParam :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Colour Double -> t -> (QDiagram b R2 m, (t, Icon))
+funParam = argumentOrParam 2 backgroundColor
+
+argumentOrParam :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Double -> Colour Double -> Colour Double -> t -> (QDiagram b R2 m, (t, Icon))
+argumentOrParam outlineScale insideColor color name = (name |> diagram, (name, Apply))
   where
     diagram = (vrule (size + (outlineWidth * squarRootThree)) # lwL defLineWidth # lc color)
-              <> baseTri # fc applyTriColor # lc outlineColor # lwL outlineWidth # named name
-              <> decoratePath (scale 0.9 baseTri) (map (\x -> mempty # named (name, x)) [AppR, AppOut, AppL]) <> mempty # named (name, AppIn)
+              <> baseTri # fc insideColor # lc outlineColor # lwL outlineWidth # named name
+              <> decoratePath (scale 0.9 baseTri) (map (\x -> mempty # named x) [AppR, AppOut, AppL]) <> mempty # named AppIn
     baseTri = triangle size # rotateBy (1/4) # alignR
     size = 0.7
-    outlineWidth = outlineScaleFactor*size :: Double
+    outlineWidth = outlineScale*outlineScaleFactor*size :: Double
     squarRootThree = 1.732
-    outlineColor = if hasOutlines colorScheme then black else applyTriColor
+    outlineColor = applyTriColor
 
 -- FUNCTION APPLY --
 funApply :: (Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Colour Double -> t -> (QDiagram b R2 m, (t, Icon))
-funApply color name = (diagram, (name, Apply))
+funApply color name = (name |> diagram, (name, Apply))
   where
     diagram = (vrule (2*radius' + (1.1 *outlineWidth)) # lwL defLineWidth # lc color) <> decoratePath verts (map makePort [AppOut, AppR, AppL, AppIn]) <> semiCirc
     semiCirc = wedge radius' (1/4 @@ turn) (-1/4 @@ turn) # fc funApplyFillColor # lc outlineColor # lwL outlineWidth
     radius' = 0.35
     insideScale = 0.9
     portDist = radius'*insideScale
-    makePort subName = mempty # named (name, subName)
+    makePort subName = mempty # named subName
     verts = fromVertices $ map p2 [(-portDist,0),(0,portDist),(0,-portDist),(0,0)]
     outlineColor = if hasOutlines colorScheme then black else funApplyFillColor
     outlineWidth = 2 * outlineScaleFactor * radius'
+
+-- RESULT --
+-- TODO add a custom color for result
+result name = (diagram, (name, Apply))
+  where
+    diagram = square 0.5 # fc (textC colorScheme) # lw none # named name
 
 -- TEXT --
 textInBox :: (Renderable (Path R2) b, IsName t) => String -> t -> (Diagram b R2, (t, Icon))
@@ -146,15 +159,15 @@ data Icon = Apply | Text
 
 conIcons :: (Enum t1, Enum t3, Renderable (Path R2) b, IsName t, IsName t1, IsName t2, IsName t3) => Colour Double -> (t, Icon) -> t1 -> (t2, Icon) -> t3 -> Diagram b R2 -> Diagram b R2
 conIcons color (name1, icon1) port1 (name2, icon2) port2 =
-  lc color. connectOutside' (lookupOptions icon1 port1 icon2 port2) (name1, port1) (name2, port2)
+  lc color. connectOutside' (lookupOptions icon1 port1 icon2 port2) (name1 .> port1) (name2 .> port2)
   
 conPortIcon :: (Enum t1, Renderable (Path R2) b, IsName t, IsName t1, IsName n2) => Colour Double -> (t, Icon) -> t1 -> (n2, Icon) -> Diagram b R2 -> Diagram b R2
 conPortIcon color (name1, icon1) port1 (name2, icon2) =
-  lc color. connectOutside' (lookupOptions icon1 port1 icon2 (0::Integer)) (name1, port1) name2
+  lc color. connectOutside' (lookupOptions icon1 port1 icon2 (0::Integer)) (name1 .> port1) name2
 
 conIconPort :: (Enum t2, Renderable (Path R2) b, IsName n1, IsName t1, IsName t2) => Colour Double -> t -> (n1, Icon) -> (t1, Icon) -> t2 -> Diagram b R2 -> Diagram b R2
 conIconPort color connectIcons (name1, icon1) (name2, icon2) port2 =
-  lc color . connectOutside' (lookupOptions icon1 0 icon2 port2) name1 (name2, port2)
+  lc color . connectOutside' (lookupOptions icon1 0 icon2 port2) name1 (name2 .> port2)
 
 lookupOptions :: (Enum a, Enum b) => Icon -> a -> Icon -> b -> ArrowOpts
 lookupOptions icon1 port1 icon2 port2 = (with :: ArrowOpts) & setTailOpts icon1 port1 & setHeadOpts icon2 port2

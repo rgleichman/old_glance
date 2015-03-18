@@ -5,11 +5,23 @@ import DrawUtil
 
 t0 :: Diagram B R2
 t0Name :: (String, Icon)
+--(t0, t0Name) = applyTriangle argColor0 "t0"
 (t0, t0Name) = applyTriangle argColor0 "t0"
 
 t1 :: Diagram B R2
 t1Name :: (String, Icon)
 (t1, t1Name) = applyTriangle argColor0 "t1"
+
+pRaw :: String -> (Diagram B R2, (String, Icon))
+pRaw = funParam argColor0
+
+p0 :: Diagram B R2
+p0Name :: (String, Icon)
+(p0, p0Name) = funParam argColor0 "p0"
+
+p1 :: Diagram B R2
+p1Name :: (String, Icon)
+(p1, p1Name) = funParam argColor0 "p1"
 
 fa0 :: Diagram B R2
 fa0Name :: (String, Icon)
@@ -30,6 +42,9 @@ f1Name :: (String, Icon)
 f2 :: Diagram B R2
 f2Name :: (String, Icon)
 (f2, f2Name) = textInBox' "f2"
+
+yRaw :: String -> (Diagram B R2, (String, Icon))
+yRaw = textInBox "y"
 
 y0 :: Diagram B R2
 y0Name :: (String, Icon)
