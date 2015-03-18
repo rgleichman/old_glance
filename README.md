@@ -32,3 +32,7 @@ y2 = f x2
 y2 = f x2" height="150"/>  
 <img src="https://drive.google.com/uc?id=0B5oSHihWzYMIT3VXcUw0cXZFRGs" alt="y1 = f x1
 y2 = f x2" height="35"/>
+
+`y = f2 $ f1 x`  
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIT2hLaGNpLVIxa2c" alt="y = f2 $ f1 x" height="150"/>  
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIT2hLaGNpLVIxa2c" alt="y = f2 $ f1 x" height="29"/>  
