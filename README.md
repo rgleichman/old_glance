@@ -13,5 +13,6 @@ Glance is a visual representation of Haskell. This readme is still a work in pro
 y1 = f1 x
 y2 = f2 x
 ```
+
 <img src="https://drive.google.com/uc?id=0B5oSHihWzYMIZkZiOS05Q2NTN1U" alt="y1 = f1 x
 y2 = f2 x" height="150"/>
