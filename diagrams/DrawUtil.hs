@@ -4,6 +4,7 @@ module DrawUtil
        ,argColor0
        ,outputColor0
        ,backgroundColor
+       ,lambdaColor
        ,defLineWidth
        ,ApplyPorts(..)
        ,applyTriangle
@@ -15,6 +16,7 @@ module DrawUtil
        ,conIcons
        ,conIconPort
        ,conPortIcon
+       ,conIconIcon
        ,Icon(..)
        )
        where
@@ -36,7 +38,10 @@ data ColorStyle a = ColorStyle {funC0 :: Colour a
                                ,funAppFC :: Colour a
                                ,bgC :: Colour a
                                ,textC :: Colour a
-                               ,hasOutlines :: Bool}
+                               ,resC :: Colour a
+                               ,lamC :: Colour a
+                               ,hasOutlines :: Bool
+                                }
 
 normalColorScheme :: (Floating a, Ord a) => ColorStyle a
 normalColorScheme =
@@ -46,7 +51,9 @@ normalColorScheme =
              ,outC = black
              ,funAppFC = brightPurple
              ,bgC = white
-             ,textC = white
+             ,textC = black
+             ,resC = black
+             ,lamC = purple
              ,hasOutlines = True}
   where
     brightPurple = sRGB24 183 0 255
@@ -60,6 +67,8 @@ blackColorScheme =
              ,funAppFC = black
              , bgC = white
              , textC = black
+             ,resC = black
+             ,lamC = black
              ,hasOutlines = False}
 
 colorOnBlackScheme :: (Floating a, Ord a) => ColorStyle a
@@ -71,6 +80,8 @@ colorOnBlackScheme =
              ,funAppFC = yellow
              ,bgC = black
              ,textC = white
+             ,resC = lightYellwGreen
+             ,lamC = lightMagenta
              ,hasOutlines = False}
   where
     --lightBlue = sRGB24 51 105 255
@@ -80,6 +91,8 @@ colorOnBlackScheme =
     bluishCyan = sRGB24 0 230 255
     reddishWhite = sRGB24 255 232 230
     yellowishGreen = sRGB24 191 255 0
+    lightYellwGreen = sRGB24 232 255 115
+    lightMagenta = sRGB24 255 134 255
   
 funColor0 :: (Floating a, Ord a) => Colour a
 funColor0 = funC0 colorScheme
@@ -91,13 +104,17 @@ outputColor0 :: (Floating a, Ord a) => Colour a
 outputColor0 = outC colorScheme
 funApplyFillColor :: (Floating a, Ord a) => Colour a
 funApplyFillColor = funAppFC colorScheme
+backgroundColor :: (Floating a, Ord a) => Colour a
 backgroundColor = bgC colorScheme
+lambdaColor :: (Floating a, Ord a) => Colour a
+lambdaColor = lamC colorScheme
 
 -- CONSTANTS --
 defLineWidth :: Fractional a => a
 defLineWidth = 0.13
 gapSize :: Fractional (Scalar v) => Measure v
 gapSize = Local 0.05
+outlineScaleFactor :: Fractional a => a
 outlineScaleFactor = 0.07
 
 -- APPLY TRIANGLE --
@@ -110,7 +127,7 @@ applyTriangle :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) 
 applyTriangle = argumentOrParam 1 applyTriColor
 
 funParam :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Colour Double -> t -> (QDiagram b R2 m, (t, Icon))
-funParam = argumentOrParam 2 backgroundColor
+funParam = argumentOrParam 2.5 backgroundColor
 
 argumentOrParam :: (Monoid m, Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => Double -> Colour Double -> Colour Double -> t -> (QDiagram b R2 m, (t, Icon))
 argumentOrParam outlineScale insideColor color name = (name |> diagram, (name, Apply))
@@ -140,9 +157,10 @@ funApply color name = (name |> diagram, (name, Apply))
 
 -- RESULT --
 -- TODO add a custom color for result
+result :: (Semigroup m, TrailLike (QDiagram b R2 m), IsName t) => t -> (QDiagram b R2 m, (t, Icon))
 result name = (diagram, (name, Apply))
   where
-    diagram = square 0.5 # fc (textC colorScheme) # lw none # named name
+    diagram = square 0.5 # fc (resC colorScheme) # lw none # named name
 
 -- TEXT --
 textInBox :: (Renderable (Path R2) b, IsName t) => String -> t -> (Diagram b R2, (t, Icon))
@@ -165,9 +183,13 @@ conPortIcon :: (Enum t1, Renderable (Path R2) b, IsName t, IsName t1, IsName n2)
 conPortIcon color (name1, icon1) port1 (name2, icon2) =
   lc color. connectOutside' (lookupOptions icon1 port1 icon2 (0::Integer)) (name1 .> port1) name2
 
-conIconPort :: (Enum t2, Renderable (Path R2) b, IsName n1, IsName t1, IsName t2) => Colour Double -> t -> (n1, Icon) -> (t1, Icon) -> t2 -> Diagram b R2 -> Diagram b R2
-conIconPort color connectIcons (name1, icon1) (name2, icon2) port2 =
+conIconPort :: (Enum a2, Renderable (Path R2) b, IsName n1, IsName a1, IsName a2) => Colour Double -> (n1, Icon) -> (a1, Icon) -> a2 -> Diagram b R2 -> Diagram b R2
+conIconPort color (name1, icon1) (name2, icon2) port2 =
   lc color . connectOutside' (lookupOptions icon1 0 icon2 port2) name1 (name2 .> port2)
+
+conIconIcon :: (Renderable (Path R2) b, IsName n1, IsName n2) => Colour Double -> (n1, Icon) -> (n2, Icon) -> Diagram b R2 -> Diagram b R2
+conIconIcon color (name1, icon1) (name2, icon2) =
+  lc color . connectOutside' (lookupOptions icon1 0 icon2 0) name1 name2
 
 lookupOptions :: (Enum a, Enum b) => Icon -> a -> Icon -> b -> ArrowOpts
 lookupOptions icon1 port1 icon2 port2 = (with :: ArrowOpts) & setTailOpts icon1 port1 & setHeadOpts icon2 port2
