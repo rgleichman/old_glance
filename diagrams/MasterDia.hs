@@ -12,6 +12,7 @@ import Dia4 (d4)
 import Dia4_1 (d4_1)
 import Dia5 (d5)
 import Dia6 (d6)
+import Dia7 (d7)
 import Diagrams.Backend.SVG (renderSVG)
 import System.FilePath ((</>), addExtension)
 
@@ -33,7 +34,8 @@ diagramsInfo = [(d1,"d1", Height 150)
               ,(d4,"d4",Height 150)
               ,(d4_1,"d4_1",Height 150)
               ,(d5,"d5", Height 150)
-              ,(d6,"d6",Height 150)]
+              ,(d6,"d6",Height 150)
+              ,(d7,"d7",Height 200)]
 
 diagrams :: [Diagram B R2]
 diagrams = fmap (\(d,_,_)->d) diagramsInfo

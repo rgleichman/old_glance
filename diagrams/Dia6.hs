@@ -10,6 +10,9 @@ import Diagrams.Backend.SVG (renderSVG)
 -- For emacs: in image window set M-x auto-revert-mode
 -- If reverts are slow, then M-x customize-variable auto-revert-interval
 
+-- f = (\q -> q)
+-- y = f x
+
 -- MAIN --
 main :: IO()
 main = mainWith framedDiagram
