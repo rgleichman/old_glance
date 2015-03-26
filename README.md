@@ -36,3 +36,18 @@ y2 = f x2" height="35"/>
 `y = f2 $ f1 x`  
 <img src="https://drive.google.com/uc?id=0B5oSHihWzYMIT2hLaGNpLVIxa2c" alt="y = f2 $ f1 x" height="150"/>  
 <img src="https://drive.google.com/uc?id=0B5oSHihWzYMIT2hLaGNpLVIxa2c" alt="y = f2 $ f1 x" height="29"/>  
+
+`y x = x`  
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIaEgyZ0tXc3lOOXc" alt="y x = x" height = "150"/>
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIaEgyZ0tXc3lOOXc" alt="y x = x" height = "40"/>
+
+`y _ = ()`  
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIWEZtbXc1ci12RVU" alt="y _ = ()" height = "200"/>
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIWEZtbXc1ci12RVU" alt="y _ = ()" height = "60"/>
+
+```Haskell
+f q = q
+y = f x
+```
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIc0dyZllBMDZwUG8" alt="f q = q; y = f x" height = "150"/>
+<img src="https://drive.google.com/uc?id=0B5oSHihWzYMIc0dyZllBMDZwUG8" alt="f q = q; y = f x" height = "50"/>
