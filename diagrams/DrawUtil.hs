@@ -30,6 +30,8 @@ import Data.Data (Typeable)
 import Diagrams.Backend.SVG.CmdLine
 import Data.Colour.SRGB (sRGB24)
 import Data.Maybe (fromMaybe)
+import Diagrams.TwoD.Polygons (polyPolarTrail)
+import Control.Lens ((^.))
 
 -- COLO(U)RS --
 colorScheme :: (Floating a, Ord a) => ColorStyle a
@@ -249,9 +251,37 @@ scope = generalConnect style (textC colorScheme)
 scopePortIcon :: (Renderable (Path R2) b, IsName a, IsName b1, IsName a1) => (a, Icon) -> b1 -> (a1, Icon) -> Diagram b R2 -> Diagram b R2
 scopePortIcon n1 p1 n2 = scope n1 (Just p1) n2 (Nothing :: Maybe Int)
 
+-- IF ELSE --
+
+--ifElse :: (Semigroup a, TrailLike a, Transformable a, V a ~ R2) => Angle -> a
+ifElse :: Angle -> Diagram B R2
+ifElse outAngle = (circle 1 <> outputDiagram)
+  where
+    output :: Located (Trail' Line R2)
+    output = fromVertices (map polarP2 [(1, outAngleTurn - nodeAngle @@ turn),(1.3, outAngle),(1, outAngleTurn + nodeAngle @@ turn)])
+    outputDiagram = closeLineLocated output
+    --outputDiagram = output # closeLine # strokeLoop # translate (r2 $ unp2 $ p1)
+    input = fromVertices
+    p1 = polarP2 (1, outAngleTurn - nodeAngle @@ turn)
+    --output = polyPolarTrail [0.1 @@ turn, 0.3 @@ turn] [0.5,2] # trailLike
+    outAngleTurn = outAngle ^. turn
+    nodeAngle = (1/24) -- turn
+    
+closeLineLocated :: Renderable (Path R2) b => Located (Trail' Line R2) -> Diagram b R2
+closeLineLocated trail = unLocated # translate (r2 $ unp2 $ loc trail)
+  where unLocated = trail # unLoc # closeLine # strokeLoop
+
+polarP2 :: (Double, Angle) -> P2
+polarP2 (0,_) = p2 (0,0)
+polarP2 (r, theta) = rotate theta . scale r $ p2 (1,0)
+
 -- MAIN --
 main :: IO()
-main = mainWith (test # frame 0.1)
+main = mainWith (ifElseTest # frame 0.1)
 
 test :: Diagram B R2
 test = fst $ funApply argColor0 "test"
+
+--ifElseTest :: Diagram B R2
+ifElseTest :: Diagram B R2
+ifElseTest = ifElse ((1/3) @@ turn)
